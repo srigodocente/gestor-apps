@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="ca" class="h-full">
 <head>
     <meta charset="UTF-8">
@@ -369,8 +369,8 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // CONFIGURACIÓ RUTA FIRESTORE (RULE 1)
-        const docPathRef = doc(db, 'artifacts', appId, 'public', 'data', 'resources_list', 'main_data');
+        // CORRECCIÓ DE LA RUTA DE FIRESTORE
+const docPathRef = doc(db, 'app_data', 'recursos');
 
         // RECURSOS PER DEFECTE
         const DEFAULT_RESOURCES = [

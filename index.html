@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ca" class="h-full">
 <head>
     <meta charset="UTF-8">
@@ -71,9 +71,9 @@
                         <span class="font-extrabold text-sm text-slate-800 dark:text-white tracking-tight whitespace-nowrap">
                             Els Meus Recursos
                         </span>
-                        <!-- Indicador de Sincronització Nube -->
-                        <span id="sync-status" class="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
-                            <i class="fa-solid fa-cloud text-[9px]"></i> Sincronitzat
+                        <!-- Indicador d'Estat Local -->
+                        <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1">
+                            <i class="fa-solid fa-hard-drive text-[9px]"></i> Mode Local
                         </span>
                     </div>
                 </div>
@@ -136,7 +136,7 @@
                         </button>
                     </div>
 
-                    <!-- BLOC 2: Targeta d'Autoria i Llicència (Centre Pàgina Inicial) - PROHIBIT MODIFICAR -->
+                    <!-- BLOC 2: Targeta d'Autoria i Llicència (Centre Pàgina Inicial) -->
                     <div class="bg-white dark:bg-slate-800 px-5 py-3 rounded-2xl border border-indigo-200 dark:border-indigo-900/50 shadow-md flex flex-col items-center text-center">
                         <a href="https://www.instagram.com/srigodocente/" target="_blank" rel="noopener" class="text-xs font-bold text-indigo-800 dark:text-indigo-400 hover:underline transition-colors flex items-center gap-1.5">
                             <i class="fa-brands fa-instagram text-indigo-800 dark:text-indigo-400"></i> Santiago Rigo Aguiló
@@ -161,8 +161,8 @@
         </main>
     </div>
 
-    <!-- ℹ️ 3. Modal d'Informació i Ajuda -->
-    <div id="modal-help-backdrop" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print transition-all">
+    <!-- ℹ️ Modal d'Informació i Ajuda -->
+    <div id="modal-help-backdrop" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden transition-all">
         <div id="modal-help" class="bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full shadow-2xl border border-slate-100 dark:border-slate-700 overflow-hidden transform scale-95 opacity-0 transition-all duration-200">
             
             <!-- Capçalera -->
@@ -193,15 +193,11 @@
                     </div>
                     <div class="flex gap-3 items-start bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700">
                         <span class="w-5 h-5 bg-brand-100 dark:bg-brand-900 text-brand-700 dark:text-brand-300 font-bold rounded-lg flex items-center justify-center flex-shrink-0 text-xs">3</span>
-                        <p><strong>Sincronització al Núvol:</strong> Els teus canvis es sincronitzen automàticament amb Firebase entre tots els teus dispositius en temps real.</p>
-                    </div>
-                    <div class="flex gap-3 items-start bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700">
-                        <span class="w-5 h-5 bg-brand-100 dark:bg-brand-900 text-brand-700 dark:text-brand-300 font-bold rounded-lg flex items-center justify-center flex-shrink-0 text-xs">4</span>
-                        <p><strong>Mode Clar / Fosc:</strong> Canvia entre el tema clar i el fosc fent clic a la icona del Sol/Luna a la barra d'eines superior.</p>
+                        <p><strong>Mode Clar / Fosc:</strong> Canvia entre el tema clar i el fosc fent clic a la icona del Sol/Luna a la pàgina d'inici.</p>
                     </div>
                 </div>
 
-                <!-- Llicència Interna - INVARIABLE -->
+                <!-- Llicència Interna -->
                 <div class="border-t border-slate-200 dark:border-slate-700 pt-4 mt-2 flex flex-col items-center text-center gap-1.5 bg-white dark:bg-slate-800 p-3 rounded-xl">
                     <span class="font-bold text-indigo-800 dark:text-indigo-400">
                        <a href="https://www.instagram.com/srigodocente/" target="_blank" rel="noopener" class="text-indigo-800 dark:text-indigo-400 hover:underline flex items-center gap-1.5">
@@ -347,35 +343,12 @@
         </div>
     </div>
 
-    <!-- SDKs DE FIREBASE -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // CONFIGURACIÓ DE FIREBASE DE L'ENTORN
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'gestor-recursos-app';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-          apiKey: "AIzaSyA-dvOdTOnBghA9WU2gC89Mp8zjEy58H94",
-          authDomain: "gestor-apps-ae5e3.firebaseapp.com",
-          projectId: "gestor-apps-ae5e3",
-          storageBucket: "gestor-apps-ae5e3.firebasestorage.app",
-          messagingSenderId: "113515159301",
-          appId: "1:113515159301:web:4493d39e8238c697c0216c"
-
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // CORRECCIÓ DE LA RUTA DE FIRESTORE
-const docPathRef = doc(db, 'app_data', 'recursos');
-
-        // RECURSOS PER DEFECTE
+    <!-- LÒGICA JS PRINCIPAL (Lliure de Firebase i LocalStorage) -->
+    <script>
+        // RECURSOS PER DEFECTE EN MEMÒRIA
         const DEFAULT_RESOURCES = [
             { id: '1', name: 'Viquipèdia (Català)', url: 'https://ca.wikipedia.org/', icon: 'fa-solid fa-book-open' },
-            { id: '2', name: 'Bing Cercador', url: 'https://www.bing.com', icon: 'fa-solid fa-magnifying-glass' },
+            { id: '2', name: 'Temporitzador', url: 'https://srigodocente.github.io/recursos-sra/apps/temporitzador.html', icon: 'fa-solid fa-hourglass-1' },
             { id: '3', name: 'OpenStreetMap', url: 'https://www.openstreetmap.org/', icon: 'fa-solid fa-map-location-dot' },
             { id: '4', name: 'W3Schools Code', url: 'https://www.w3schools.com/', icon: 'fa-solid fa-code' }
         ];
@@ -434,87 +407,10 @@ const docPathRef = doc(db, 'app_data', 'recursos');
         };
 
         window.EDIT_PASSWORD = '230202';
-        window.resources = DEFAULT_RESOURCES;
+        window.resources = [...DEFAULT_RESOURCES];
         window.isEditingUnlocked = false;
         window.activeResourceId = null;
 
-        // INICIALITZACIÓ I AUTENTICACIÓ FIREBASE (SENSE LOCALSTORAGE)
-        async function initFirebaseSync() {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (err) {
-                console.warn("Autenticació anònima fallback:", err);
-            }
-
-            // Escultar canvis en temps real des de la Nube Firestore
-            onSnapshot(docPathRef, (docSnap) => {
-                const statusEl = document.getElementById('sync-status');
-                if (docSnap.exists() && docSnap.data().items) {
-                    window.resources = docSnap.data().items;
-                    if (statusEl) {
-                        statusEl.innerHTML = `<i class="fa-solid fa-cloud-check text-[9px]"></i> Sincronitzat`;
-                        statusEl.className = "text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1";
-                    }
-                } else {
-                    // Inicialitzar document en Firestore si està buit
-                    saveResourcesToFirebase(DEFAULT_RESOURCES);
-                }
-                renderResources();
-            }, (error) => {
-                console.error("Error escoltant Firestore:", error);
-                const statusEl = document.getElementById('sync-status');
-                if (statusEl) {
-                    statusEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-[9px]"></i> Error Connexió`;
-                    statusEl.className = "text-[10px] text-rose-600 dark:text-rose-400 font-medium flex items-center gap-1";
-                }
-                renderResources();
-            });
-        }
-
-        // GUARDAR CANVIS A FIREBASE (SENSE LOCALSTORAGE)
-        async function saveResourcesToFirebase(itemsList) {
-            const statusEl = document.getElementById('sync-status');
-            if (statusEl) {
-                statusEl.innerHTML = `<i class="fa-solid fa-rotate text-[9px] animate-spin"></i> Desant...`;
-            }
-
-            try {
-                // Desa exclusivament a la nube de Firebase
-                await setDoc(docPathRef, { 
-                    items: itemsList,
-                    updatedAt: new Date().toISOString()
-                });
-            } catch (error) {
-                console.error("Error en desar a Firebase:", error);
-            }
-        }
-
-        window.saveResourcesToStorage = function() {
-            saveResourcesToFirebase(window.resources);
-        };
-
-        // --- INICIALITZACIÓ GLOBAL ---
-        window.onload = function() {
-            initTheme();
-            renderResources();
-            renderIconGrid();
-            initFirebaseSync();
-            
-            document.addEventListener('mouseup', function(e) {
-                const sidebar = document.getElementById('sidebar');
-                if (sidebar && !sidebar.contains(e.target)) {
-                    collapseSidebar();
-                }
-            });
-        };
-    </script>
-
-    <!-- INTERACCIÓ DE LA INTERFAZ -->
-    <script>
         function renderIconGrid() {
             if (!window.ICON_CATEGORIES) return;
             Object.keys(window.ICON_CATEGORIES).forEach(groupId => {
@@ -556,7 +452,7 @@ const docPathRef = doc(db, 'app_data', 'recursos');
         function initTheme() {
             const icon = document.getElementById('theme-toggle-icon');
             const text = document.getElementById('theme-toggle-text');
-            if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
                 document.documentElement.classList.add('dark');
                 if(icon) icon.className = 'fa-solid fa-sun text-lg text-amber-300';
                 if(text) text.textContent = 'Mode Clar';
@@ -572,12 +468,10 @@ const docPathRef = doc(db, 'app_data', 'recursos');
             const text = document.getElementById('theme-toggle-text');
             if (document.documentElement.classList.contains('dark')) {
                 document.documentElement.classList.remove('dark');
-                localStorage.setItem('color-theme', 'light');
                 if(icon) icon.className = 'fa-solid fa-moon text-lg';
                 if(text) text.textContent = 'Mode Fosc';
             } else {
                 document.documentElement.classList.add('dark');
-                localStorage.setItem('color-theme', 'dark');
                 if(icon) icon.className = 'fa-solid fa-sun text-lg text-amber-300';
                 if(text) text.textContent = 'Mode Clar';
             }
@@ -797,9 +691,6 @@ const docPathRef = doc(db, 'app_data', 'recursos');
                 window.resources.push(newRes);
             }
 
-            if (window.saveResourcesToStorage) {
-                window.saveResourcesToStorage();
-            }
             renderResources();
             closeResourceModal();
         }
@@ -809,9 +700,6 @@ const docPathRef = doc(db, 'app_data', 'recursos');
             window.resources = window.resources.filter(r => r.id !== id);
             if (window.activeResourceId === id) {
                 goHome();
-            }
-            if (window.saveResourcesToStorage) {
-                window.saveResourcesToStorage();
             }
             renderResources();
         }
@@ -833,6 +721,19 @@ const docPathRef = doc(db, 'app_data', 'recursos');
             modal.classList.add('scale-95', 'opacity-0');
             setTimeout(() => { backdrop.classList.add('hidden'); }, 200);
         }
+
+        window.onload = function() {
+            initTheme();
+            renderResources();
+            renderIconGrid();
+            
+            document.addEventListener('mouseup', function(e) {
+                const sidebar = document.getElementById('sidebar');
+                if (sidebar && !sidebar.contains(e.target)) {
+                    collapseSidebar();
+                }
+            });
+        };
     </script>
 </body>
 </html>

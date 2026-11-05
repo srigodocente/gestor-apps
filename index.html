@@ -67,9 +67,15 @@
                     <div class="w-10 h-10 rounded-xl bg-brand-50 dark:bg-slate-700 flex items-center justify-center text-brand-600 dark:text-brand-500 font-bold flex-shrink-0">
                         <i class="fa-solid fa-bookmark text-lg"></i>
                     </div>
-                    <span class="font-extrabold text-sm text-slate-800 dark:text-white tracking-tight whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        Els Meus Recursos
-                    </span>
+                    <div class="flex flex-col opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <span class="font-extrabold text-sm text-slate-800 dark:text-white tracking-tight whitespace-nowrap">
+                            Els Meus Recursos
+                        </span>
+                        <!-- Indicador de Sincronització Nube -->
+                        <span id="sync-status" class="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+                            <i class="fa-solid fa-cloud text-[9px]"></i> Sincronitzat
+                        </span>
+                    </div>
                 </div>
 
                 <!-- Botó d'Edició / Bloqueig (Candat Obert/Tancat) -->
@@ -187,11 +193,7 @@
                     </div>
                     <div class="flex gap-3 items-start bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700">
                         <span class="w-5 h-5 bg-brand-100 dark:bg-brand-900 text-brand-700 dark:text-brand-300 font-bold rounded-lg flex items-center justify-center flex-shrink-0 text-xs">3</span>
-                        <p><strong>Afegir Recursos:</strong> Amb el mode edició actiu, pots afegir nous recursos des de la part inferior del menú lateral triant la seva contrasenya i icona.</p>
-                    </div>
-                    <div class="flex gap-3 items-start bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700">
-                        <span class="w-5 h-5 bg-brand-100 dark:bg-brand-900 text-brand-700 dark:text-brand-300 font-bold rounded-lg flex items-center justify-center flex-shrink-0 text-xs">3</span>
-                        <p><strong>Afegir Recursos:</strong> Introdueix un títol, la URL del web i tria una icona representativa de FontAwesome 6 per personalitzar els teus accessos directes.</p>
+                        <p><strong>Sincronització al Núvol:</strong> Els teus canvis es sincronitzen automàticament amb Firebase entre tots els teus dispositius en temps real.</p>
                     </div>
                     <div class="flex gap-3 items-start bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700">
                         <span class="w-5 h-5 bg-brand-100 dark:bg-brand-900 text-brand-700 dark:text-brand-300 font-bold rounded-lg flex items-center justify-center flex-shrink-0 text-xs">4</span>
@@ -272,37 +274,31 @@
                         <!-- General i Educació -->
                         <div>
                             <span class="text-[10px] font-bold tracking-wider text-slate-400 uppercase block mb-1">General i Educació</span>
-                            <div class="grid grid-cols-6 gap-1.5" id="group-education">
-                                <!-- Generat per JS o definit directament -->
-                            </div>
+                            <div class="grid grid-cols-6 gap-1.5" id="group-education"></div>
                         </div>
 
                         <!-- Cerca i Informació -->
                         <div>
                             <span class="text-[10px] font-bold tracking-wider text-slate-400 uppercase block mb-1">Cerca i Informació</span>
-                            <div class="grid grid-cols-6 gap-1.5" id="group-search">
-                            </div>
+                            <div class="grid grid-cols-6 gap-1.5" id="group-search"></div>
                         </div>
 
                         <!-- Tecnologia i Eines -->
                         <div>
                             <span class="text-[10px] font-bold tracking-wider text-slate-400 uppercase block mb-1">Tecnologia i Eines</span>
-                            <div class="grid grid-cols-6 gap-1.5" id="group-tech">
-                            </div>
+                            <div class="grid grid-cols-6 gap-1.5" id="group-tech"></div>
                         </div>
 
                         <!-- Multimèdia i Comunicació -->
                         <div>
                             <span class="text-[10px] font-bold tracking-wider text-slate-400 uppercase block mb-1">Multimèdia i Comunicació</span>
-                            <div class="grid grid-cols-6 gap-1.5" id="group-media">
-                            </div>
+                            <div class="grid grid-cols-6 gap-1.5" id="group-media"></div>
                         </div>
 
                         <!-- Altres -->
                         <div>
                             <span class="text-[10px] font-bold tracking-wider text-slate-400 uppercase block mb-1">Altres</span>
-                            <div class="grid grid-cols-6 gap-1.5" id="group-other">
-                            </div>
+                            <div class="grid grid-cols-6 gap-1.5" id="group-other"></div>
                         </div>
                     </div>
                 </div>
@@ -351,9 +347,31 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT DE L'APLICACIÓ -->
-    <script>
-        // --- ESTAT DE L'APLICACIÓ ---
+    <!-- SDKs DE FIREBASE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // CONFIGURACIÓ DE FIREBASE DE L'ENTORN
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'gestor-recursos-app';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "demo-key",
+            authDomain: "demo.firebaseapp.com",
+            projectId: "demo-project",
+            storageBucket: "demo.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:demo"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // CONFIGURACIÓ RUTA FIRESTORE (RULE 1)
+        const docPathRef = doc(db, 'artifacts', appId, 'public', 'data', 'resources_list', 'main_data');
+
+        // RECURSOS PER DEFECTE
         const DEFAULT_RESOURCES = [
             { id: '1', name: 'Viquipèdia (Català)', url: 'https://ca.wikipedia.org/', icon: 'fa-solid fa-book-open' },
             { id: '2', name: 'Bing Cercador', url: 'https://www.bing.com', icon: 'fa-solid fa-magnifying-glass' },
@@ -361,7 +379,7 @@
             { id: '4', name: 'W3Schools Code', url: 'https://www.w3schools.com/', icon: 'fa-solid fa-code' }
         ];
 
-        const ICON_CATEGORIES = {
+        window.ICON_CATEGORIES = {
             'group-education': [
                 'fa-solid fa-globe', 'fa-solid fa-book', 'fa-solid fa-book-open', 'fa-solid fa-book-bookmark', 'fa-solid fa-bookmark',
                 'fa-solid fa-graduation-cap', 'fa-solid fa-school', 'fa-solid fa-pen-to-square', 'fa-solid fa-pencil', 'fa-solid fa-pen',
@@ -414,33 +432,96 @@
             ]
         };
 
-        const EDIT_PASSWORD = '230202';
-        let resources = JSON.parse(localStorage.getItem('app_resources')) || DEFAULT_RESOURCES;
-        let isEditingUnlocked = false;
-        let activeResourceId = null;
+        window.EDIT_PASSWORD = '230202';
+        window.resources = DEFAULT_RESOURCES;
+        window.isEditingUnlocked = false;
+        window.activeResourceId = null;
 
-        // --- INICIALITZACIÓ ---
+        // INICIALITZACIÓ I AUTENTICACIÓ FIREBASE (SENSE LOCALSTORAGE)
+        async function initFirebaseSync() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.warn("Autenticació anònima fallback:", err);
+            }
+
+            // Escultar canvis en temps real des de la Nube Firestore
+            onSnapshot(docPathRef, (docSnap) => {
+                const statusEl = document.getElementById('sync-status');
+                if (docSnap.exists() && docSnap.data().items) {
+                    window.resources = docSnap.data().items;
+                    if (statusEl) {
+                        statusEl.innerHTML = `<i class="fa-solid fa-cloud-check text-[9px]"></i> Sincronitzat`;
+                        statusEl.className = "text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1";
+                    }
+                } else {
+                    // Inicialitzar document en Firestore si està buit
+                    saveResourcesToFirebase(DEFAULT_RESOURCES);
+                }
+                renderResources();
+            }, (error) => {
+                console.error("Error escoltant Firestore:", error);
+                const statusEl = document.getElementById('sync-status');
+                if (statusEl) {
+                    statusEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-[9px]"></i> Error Connexió`;
+                    statusEl.className = "text-[10px] text-rose-600 dark:text-rose-400 font-medium flex items-center gap-1";
+                }
+                renderResources();
+            });
+        }
+
+        // GUARDAR CANVIS A FIREBASE (SENSE LOCALSTORAGE)
+        async function saveResourcesToFirebase(itemsList) {
+            const statusEl = document.getElementById('sync-status');
+            if (statusEl) {
+                statusEl.innerHTML = `<i class="fa-solid fa-rotate text-[9px] animate-spin"></i> Desant...`;
+            }
+
+            try {
+                // Desa exclusivament a la nube de Firebase
+                await setDoc(docPathRef, { 
+                    items: itemsList,
+                    updatedAt: new Date().toISOString()
+                });
+            } catch (error) {
+                console.error("Error en desar a Firebase:", error);
+            }
+        }
+
+        window.saveResourcesToStorage = function() {
+            saveResourcesToFirebase(window.resources);
+        };
+
+        // --- INICIALITZACIÓ GLOBAL ---
         window.onload = function() {
             initTheme();
             renderResources();
             renderIconGrid();
+            initFirebaseSync();
             
             document.addEventListener('mouseup', function(e) {
                 const sidebar = document.getElementById('sidebar');
-                if (!sidebar.contains(e.target)) {
+                if (sidebar && !sidebar.contains(e.target)) {
                     collapseSidebar();
                 }
             });
         };
+    </script>
 
-        // --- RENDERITZAT DE LA GRAELLA D'ICONES ---
+    <!-- INTERACCIÓ DE LA INTERFAZ -->
+    <script>
         function renderIconGrid() {
-            Object.keys(ICON_CATEGORIES).forEach(groupId => {
+            if (!window.ICON_CATEGORIES) return;
+            Object.keys(window.ICON_CATEGORIES).forEach(groupId => {
                 const container = document.getElementById(groupId);
                 if (!container) return;
                 container.innerHTML = '';
                 
-                ICON_CATEGORIES[groupId].forEach(iconClass => {
+                window.ICON_CATEGORIES[groupId].forEach(iconClass => {
                     const btn = document.createElement('button');
                     btn.type = 'button';
                     btn.className = `icon-select-btn p-2 rounded-xl flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-slate-700 transition-all border border-transparent`;
@@ -462,7 +543,6 @@
             document.getElementById('icon-preview').className = iconValue;
             document.getElementById('icon-name-display').textContent = iconValue;
 
-            // Highlight botó seleccionat
             document.querySelectorAll('.icon-select-btn').forEach(btn => {
                 if (btn.getAttribute('data-icon') === iconValue) {
                     btn.className = 'icon-select-btn p-2 rounded-xl flex items-center justify-center bg-brand-600 text-white shadow-sm border border-brand-600';
@@ -472,7 +552,6 @@
             });
         }
 
-        // --- MODE CLAR / FOSC ---
         function initTheme() {
             const icon = document.getElementById('theme-toggle-icon');
             const text = document.getElementById('theme-toggle-text');
@@ -503,28 +582,27 @@
             }
         }
 
-        // --- GESTIÓ BARRA LATERAL (DESPLEGABLE / PLEGAR) ---
         function expandSidebar() {
             const sidebar = document.getElementById('sidebar');
-            sidebar.classList.remove('w-16');
-            sidebar.classList.add('w-72');
+            if (sidebar) {
+                sidebar.classList.remove('w-16');
+                sidebar.classList.add('w-72');
+            }
         }
 
         function collapseSidebar() {
             const sidebar = document.getElementById('sidebar');
-            sidebar.classList.remove('w-72');
-            sidebar.classList.add('w-16');
+            if (sidebar) {
+                sidebar.classList.remove('w-72');
+                sidebar.classList.add('w-16');
+            }
         }
 
-        // --- GESTIÓ DE BLOQUEIG / EDICIÓ I CONTRASENYA ---
         function toggleEditLock(event) {
             if (event) event.stopPropagation();
-            
-            if (isEditingUnlocked) {
-                // Bloquejar directament sense demanar contrasenya
+            if (window.isEditingUnlocked) {
                 setEditState(false);
             } else {
-                // Demanar contrasenya per desbloquejar
                 openPasswordModal();
             }
         }
@@ -553,7 +631,7 @@
         function verifyPassword(event) {
             event.preventDefault();
             const input = document.getElementById('pass-input').value;
-            if (input === EDIT_PASSWORD) {
+            if (input === window.EDIT_PASSWORD) {
                 closePasswordModal();
                 setEditState(true);
             } else {
@@ -562,12 +640,12 @@
         }
 
         function setEditState(unlocked) {
-            isEditingUnlocked = unlocked;
+            window.isEditingUnlocked = unlocked;
             const lockIcon = document.getElementById('lock-icon');
             const lockBtn = document.getElementById('lock-btn');
             const addBtnContainer = document.getElementById('sidebar-add-btn-container');
 
-            if (isEditingUnlocked) {
+            if (window.isEditingUnlocked) {
                 lockIcon.className = 'fa-solid fa-lock-open text-sm';
                 lockBtn.title = 'Mode Edició Actiu (Feu clic per bloquejar)';
                 lockBtn.classList.add('bg-amber-500', 'border-amber-500');
@@ -582,13 +660,14 @@
             renderResources();
         }
 
-        // --- RENDERITZAT DE RECURSOS ---
         function renderResources() {
             const container = document.getElementById('resources-list');
+            if (!container) return;
             container.innerHTML = '';
 
-            resources.forEach(res => {
-                const isActive = res.id === activeResourceId;
+            const list = window.resources || [];
+            list.forEach(res => {
+                const isActive = res.id === window.activeResourceId;
                 const item = document.createElement('div');
                 item.className = `group/item flex items-center justify-between p-2 rounded-xl cursor-pointer transition-all ${
                     isActive 
@@ -599,7 +678,7 @@
                 item.onclick = () => loadResource(res);
 
                 let editButtonsHtml = '';
-                if (isEditingUnlocked) {
+                if (window.isEditingUnlocked) {
                     editButtonsHtml = `
                         <div class="flex items-center gap-1 opacity-100 transition-opacity">
                             <button onclick="openEditModal(event, '${res.id}')" class="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-500 hover:text-brand-600 rounded-lg transition-colors" title="Editar">
@@ -628,9 +707,8 @@
             });
         }
 
-        // --- CARREGAR RECURS A L'IFRAME ---
         function loadResource(res) {
-            activeResourceId = res.id;
+            window.activeResourceId = res.id;
             const iframe = document.getElementById('main-frame');
             const emptyState = document.getElementById('empty-state');
 
@@ -643,16 +721,11 @@
         }
 
         function goHome() {
-            activeResourceId = null;
+            window.activeResourceId = null;
             document.getElementById('main-frame').classList.add('hidden');
             document.getElementById('main-frame').src = '';
             document.getElementById('empty-state').classList.remove('hidden');
             renderResources();
-        }
-
-        // --- CRUD RECURSOS ---
-        function saveResourcesToStorage() {
-            localStorage.setItem('app_resources', JSON.stringify(resources));
         }
 
         function openAddModal() {
@@ -674,7 +747,7 @@
 
         function openEditModal(event, id) {
             event.stopPropagation();
-            const res = resources.find(r => r.id === id);
+            const res = window.resources.find(r => r.id === id);
             if (!res) return;
 
             document.getElementById('resource-modal-title').textContent = 'Editar Recurs';
@@ -709,9 +782,9 @@
             const icon = document.getElementById('res-icon').value;
 
             if (id) {
-                const index = resources.findIndex(r => r.id === id);
+                const index = window.resources.findIndex(r => r.id === id);
                 if (index !== -1) {
-                    resources[index] = { id, name, url, icon };
+                    window.resources[index] = { id, name, url, icon };
                 }
             } else {
                 const newRes = {
@@ -720,25 +793,28 @@
                     url,
                     icon
                 };
-                resources.push(newRes);
+                window.resources.push(newRes);
             }
 
-            saveResourcesToStorage();
+            if (window.saveResourcesToStorage) {
+                window.saveResourcesToStorage();
+            }
             renderResources();
             closeResourceModal();
         }
 
         function deleteResource(event, id) {
             event.stopPropagation();
-            resources = resources.filter(r => r.id !== id);
-            if (activeResourceId === id) {
+            window.resources = window.resources.filter(r => r.id !== id);
+            if (window.activeResourceId === id) {
                 goHome();
             }
-            saveResourcesToStorage();
+            if (window.saveResourcesToStorage) {
+                window.saveResourcesToStorage();
+            }
             renderResources();
         }
 
-        // --- GESTIÓ MODAL DE HELP ---
         function openHelpModal() {
             const backdrop = document.getElementById('modal-help-backdrop');
             const modal = document.getElementById('modal-help');
